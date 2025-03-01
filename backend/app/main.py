@@ -53,7 +53,7 @@ async def upload_clinical_notes(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Get file information
+        # Get file info
         file_info = {
             "original_filename": file.filename,
             "saved_as": unique_filename,
