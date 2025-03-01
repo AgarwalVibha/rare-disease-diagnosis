@@ -22,72 +22,6 @@ app.add_middleware(
 async def read_root():
     return {"Hello": "World"}
 
-
-    # ___________________________ CODE FOR UPLOADING CLINICAL NOTES ___________________________
-# Model for clinical notes analysis response
-class ClinicalAnalysisResponse(BaseModel):
-    success: bool
-    message: str
-    file_info: Optional[Dict[str, Any]] = None
-    potential_diagnoses: Optional[List[Dict[str, Any]]] = None
-    recommendations: Optional[List[Dict[str, Any]]] = None
-
-# Ensure uploads directory exists
-UPLOAD_DIR = "app/uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-@app.post("/clinical-notes", response_model=ClinicalAnalysisResponse)
-async def upload_clinical_notes(
-    file: UploadFile = File(...),
-    patient_id: Optional[str] = Form(None),
-    notes: Optional[str] = Form(None)
-):
-    try:
-        # Generate a unique filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_extension = os.path.splitext(file.filename)[1]
-        unique_filename = f"{timestamp}{file_extension}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-        
-        # Save the uploaded file
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        
-        # Get file info
-        file_info = {
-            "original_filename": file.filename,
-            "saved_as": unique_filename,
-            "content_type": file.content_type,
-            "size_in_bytes": os.path.getsize(file_path),
-            "patient_id": patient_id,
-            "additional_notes": notes
-        }
-        
-        # In a real application, you would process the clinical notes here
-        # For demonstration, we'll return mock diagnoses based on the file
-        mock_diagnoses = [
-            {"id": 1, "name": "Ehlers-Danlos Syndrome", "probability": "65%", "details": "Connective tissue disorder"},
-            {"id": 2, "name": "Marfan Syndrome", "probability": "48%", "details": "Genetic disorder affecting connective tissue"},
-            {"id": 3, "name": "Pompe Disease", "probability": "32%", "details": "Rare genetic disorder causing muscle weakness"},
-        ]
-        
-        # Return success response with mock data
-        return {
-            "success": True,
-            "message": f"Successfully processed clinical notes from file: {file.filename}",
-            "file_info": file_info,
-            "potential_diagnoses": mock_diagnoses,
-            "recommendations": sample_recommendations
-        }
-    
-    except Exception as e:
-        # If anything goes wrong during upload/processing
-        return {
-            "success": False,
-            "message": f"Error processing file: {str(e)}"
-        }
-    
-
 # ___________________________ CODE FOR UPLOADING AND GETTING HPO TERMS ___________________________
 # Add these models and global dictionary for HPO codes
 
@@ -157,6 +91,91 @@ async def get_hpo_codes():
     """
     return {"codes": list(hpo_codes_dict.values())}
 
+    # ___________________________ CODE FOR UPLOADING CLINICAL NOTES ___________________________
+# Model for clinical notes analysis response
+class ClinicalAnalysisResponse(BaseModel):
+    success: bool
+    message: str
+    file_info: Optional[Dict[str, Any]] = None
+    potential_diagnoses: Optional[List[Dict[str, Any]]] = None
+    recommendations: Optional[List[Dict[str, Any]]] = None
+
+# Ensure uploads directory exists
+UPLOAD_DIR = "app/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+@app.post("/clinical-notes", response_model=ClinicalAnalysisResponse)
+async def upload_clinical_notes(
+    file: UploadFile = File(...),
+    patient_id: Optional[str] = Form(None),
+    notes: Optional[str] = Form(None)
+):
+    try:
+        # Generate a unique filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_extension = os.path.splitext(file.filename)[1]
+        unique_filename = f"{timestamp}{file_extension}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+        
+        # Save the uploaded file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Get file info
+        file_info = {
+            "original_filename": file.filename,
+            "saved_as": unique_filename,
+            "content_type": file.content_type,
+            "size_in_bytes": os.path.getsize(file_path),
+            "patient_id": patient_id,
+            "additional_notes": notes
+        }
+
+        # TODO update hpo_codes_dict (see get hpo-codes for format)
+        
+        # Return success response with mock data
+        return {
+            "success": True,
+            "message": f"Successfully processed clinical notes from file: {file.filename}",
+            "file_info": file_info,
+        }
+    
+    except Exception as e:
+        # If anything goes wrong during upload/processing
+        return {
+            "success": False,
+            "message": f"Error processing file: {str(e)}"
+        }
+    
+# ___________________________ CODE FOR DIAGNOSING ___________________________
+
+# Define a model for Diagnosis
+class Diagnosis(BaseModel):
+    id: int
+    name: str
+    probability: str
+    details: str
+
+# Define a response model for list of diagnoses
+class DiagnosesResponse(BaseModel):
+    diagnoses: List[Diagnosis]
+
+# Global dictionary to store diagnoses for each patient
+patient_diagnoses: Dict[str, List[Dict[str, Any]]] = {}
+
+# Mock diagnoses data - would normally be generated from HPO codes and clinical notes
+default_diagnoses = [
+    {"id": 1, "name": "Ehlers-Danlos Syndrome", "probability": "65%", "details": "Connective tissue disorder"},
+    {"id": 2, "name": "Marfan Syndrome", "probability": "48%", "details": "Genetic disorder affecting connective tissue"},
+    {"id": 3, "name": "Pompe Disease", "probability": "32%", "details": "Rare genetic disorder causing muscle weakness"},
+]
+
+@app.get("/diagnoses", response_model=DiagnosesResponse)
+async def get_diagnoses():
+    # TODO (Isha)
+    # use hpo_codes_dict
+    return {"diagnoses": default_diagnoses}
+
 # ___________________________ CODE FOR RECOMMENDATIONS ___________________________
 # Define a model for Recommendation
 class Recommendation(BaseModel):
@@ -180,5 +199,6 @@ sample_recommendations = [
 # GET route to fetch all recommendations
 @app.get("/recommendations", response_model=RecommendationsResponse)
 async def get_recommendations():
-
+    # TODO (aaron)
+    # use hpo_codes_dict and diagnosis and 20 unknown phenotypes on what to do next
     return {"recommendations": sample_recommendations}
