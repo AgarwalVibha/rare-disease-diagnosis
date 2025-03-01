@@ -1,6 +1,4 @@
-# plain-fastapi-react-docker
-
-This project is a basic setup for a web application using FastAPI and React, containerized with Docker. The backend serves a simple API that communicates with the frontend, which displays data retrieved from the API.
+This project is a basic setup adapted from the repo plain-fastapi-react-docker for a web application using FastAPI and React, containerized with Docker. The backend serves a simple API that communicates with the frontend, which displays data retrieved from the API.
 
 ## Project Structure
 
@@ -29,12 +27,13 @@ To run this project, you will need Docker and Docker Compose installed on your m
 1. **Clone the Repository**
    ```bash
    git clone https://yourrepositoryurl/plain-fastapi-react-docker.git
-   cd plain-fastapi-react-docker
+   cd rare-disease-diagnosis
    ```
 
 2. **Build and Run the Docker Containers**
    ```bash
-   docker-compose up --build
+   docker compose build
+   docker compose up
    ```
 
    This command builds the images for the frontend and backend if they don't exist and starts the containers. The backend is available at `http://localhost:80/` and the frontend at `http://localhost:3000/`.
