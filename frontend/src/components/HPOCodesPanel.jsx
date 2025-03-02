@@ -46,14 +46,22 @@ const HPOCodesPanel = ({ sx }) => {
         fetchHPOCodes();
 
         // Set up polling to periodically check for updates
-        const intervalId = setInterval(fetchHPOCodes, 2000); // Check every 30 seconds
+        const intervalId = setInterval(fetchHPOCodes, 2000);
 
         // Clean up interval on component unmount
         return () => clearInterval(intervalId);
     }, []);
 
     return (
-        <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', ...sx }}>
+        <Card
+            variant="outlined"
+            sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                ...sx
+            }}
+        >
             <Typography level="title-md" sx={{ mb: 2 }}>
                 Your Medical Profile
             </Typography>
@@ -89,10 +97,19 @@ const HPOCodesPanel = ({ sx }) => {
                     </Typography>
                 </Sheet>
             ) : (
-                <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+                <Box
+                    sx={{
+                        flexGrow: 1,
+                        overflowY: 'auto',
+                        maxHeight: '400px',
+                    }}
+                >
                     <List>
                         {hpoCodes.map((code) => (
-                            <ListItem key={code.id}>
+                            <ListItem
+                                key={code.id}
+                                sx={{ py: 1.5 }}
+                            >
                                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                                         <Typography level="body-md">{code.name}</Typography>

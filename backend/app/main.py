@@ -47,32 +47,27 @@ hpo_codes_dict: Dict[str, HPOCode] = {}
 
 # TODO: Replace this with actual lookup from HPO data file
 def lookup_hpo_name(hpo_id: str) -> str:
-    """
-    Look up the name of an HPO term based on its ID.
+    hpo_codes_to_names = {
+        "HP:0001065": "Atrophic scarring",
+        "HP:0011675":"Arrhythmia",
+        "HP:0001382": "Joint hypermobility",
+    }
     
-    Args:
-        hpo_id: HPO ID in the format "HP:0000123"
-        
-    Returns:
-        The name of the HPO term
-    """
-    # Placeholder function that returns random names
-    # This will be replaced with actual lookup logic from HPO data file
+    # sample_names = [
+    #     "Joint hypermobility",
+    #     "Abnormal joint mobility",
+    #     "Joint pain",
+    #     "Fatigue",
+    #     "Muscular hypotonia",
+    #     "Recurrent joint dislocations",
+    #     "Skin hyperextensibility",
+    #     "Delayed gross motor development",
+    #     "Poor coordination",
+    #     "Easy bruising"
+    # ]
     
-    sample_names = [
-        "Joint hypermobility",
-        "Abnormal joint mobility",
-        "Joint pain",
-        "Fatigue",
-        "Muscular hypotonia",
-        "Recurrent joint dislocations",
-        "Skin hyperextensibility",
-        "Delayed gross motor development",
-        "Poor coordination",
-        "Easy bruising"
-    ]
-    
-    return random.choice(sample_names)
+    # return random.choice(sample_names)
+    return hpo_codes_to_names[hpo_id]
 
 # Update the add_hpo_codes endpoint to use the lookup function
 @app.post("/hpo-codes", response_model=HPOCodesResponse)
@@ -81,9 +76,13 @@ async def add_hpo_codes(codes: List[HPOCode]):
     Add a list of HPO codes
     """
     # Add each code to the global dictionary, using ID as key to avoid duplicates
+    global hpo_codes_dict
+    print(codes)
     for code in codes:
         # Only lookup the name if it's the placeholder
+        print(code)
         code.name = lookup_hpo_name(code.id)
+        print(code)
         
         hpo_codes_dict[code.id] = code
     

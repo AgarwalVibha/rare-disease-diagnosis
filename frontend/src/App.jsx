@@ -19,10 +19,24 @@ import Divider from '@mui/joy/Divider';
 import InputIcon from '@mui/icons-material/Input';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import MenuIcon from '@mui/icons-material/Menu';
+import HistoryIcon from '@mui/icons-material/History';
+import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
+import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
+import ImageIcon from '@mui/icons-material/Image';
+import BiotechIcon from '@mui/icons-material/Biotech';
+import MedicalInformationIcon from '@mui/icons-material/MedicalInformation';
 
 // Import pages
 import InputsPage from './pages/InputsPage';
 import ResultsPage from './pages/ResultsPage';
+
+// Placeholder component for the new pages
+const PlaceholderPage = ({ title }) => (
+  <Box sx={{ p: 3 }}>
+    <Typography level="h2" sx={{ mb: 2 }}>{title}</Typography>
+    <Typography>This page is a placeholder for the {title} section in the demo.</Typography>
+  </Box>
+);
 
 function App() {
   // State to track active page
@@ -37,6 +51,17 @@ function App() {
     setDrawerOpen(false); // Close drawer after navigation on mobile
   };
 
+  // Navigation items with icons and page references
+  const navigationItems = [
+    { id: 'background', label: 'Background', icon: <HistoryIcon /> },
+    { id: 'inputs', label: 'Symptoms', icon: <InputIcon /> },
+    { id: 'family', label: 'Family History', icon: <FamilyRestroomIcon /> },
+    { id: 'biometrics', label: 'Biometrics', icon: <MonitorWeightIcon /> },
+    { id: 'imaging', label: 'Imaging', icon: <ImageIcon /> },
+    { id: 'genetic', label: 'Genetic Testing', icon: <BiotechIcon /> },
+    { id: 'assessment', label: 'Assessment', icon: <AssessmentIcon /> },
+  ];
+
   // Drawer content component
   const DrawerContent = () => (
     <Box sx={{ width: 240, p: 2 }}>
@@ -45,39 +70,38 @@ function App() {
       </Typography>
       <Divider sx={{ my: 2 }} />
       <List size="lg" sx={{ '--ListItem-radius': '8px' }}>
-        <ListItem>
-          <ListItemButton
-            selected={activePage === 'inputs'}
-            onClick={() => handleNavigation('inputs')}
-            sx={{
-              fontWeight: activePage === 'inputs' ? 'bold' : 'normal',
-              bgcolor: activePage === 'inputs' ? 'primary.softBg' : 'transparent'
-            }}
-          >
-            <ListItemDecorator>
-              <InputIcon />
-            </ListItemDecorator>
-            <ListItemContent>History</ListItemContent>
-          </ListItemButton>
-        </ListItem>
-        <ListItem>
-          <ListItemButton
-            selected={activePage === 'results'}
-            onClick={() => handleNavigation('results')}
-            sx={{
-              fontWeight: activePage === 'results' ? 'bold' : 'normal',
-              bgcolor: activePage === 'results' ? 'primary.softBg' : 'transparent'
-            }}
-          >
-            <ListItemDecorator>
-              <AssessmentIcon />
-            </ListItemDecorator>
-            <ListItemContent>Guidance</ListItemContent>
-          </ListItemButton>
-        </ListItem>
+        {navigationItems.map((item) => (
+          <ListItem key={item.id}>
+            <ListItemButton
+              selected={activePage === item.id}
+              onClick={() => handleNavigation(item.id)}
+              sx={{
+                fontWeight: activePage === item.id ? 'bold' : 'normal',
+                bgcolor: activePage === item.id ? 'primary.softBg' : 'transparent'
+              }}
+            >
+              <ListItemDecorator>
+                {item.icon}
+              </ListItemDecorator>
+              <ListItemContent>{item.label}</ListItemContent>
+            </ListItemButton>
+          </ListItem>
+        ))}
       </List>
     </Box>
   );
+
+  // Render the appropriate page based on active page state
+  const renderActivePage = () => {
+    switch (activePage) {
+      case 'inputs':
+        return <InputsPage />;
+      case 'assessment':
+        return <ResultsPage />; // Using the existing ResultsPage component but renamed to Assessment
+      default:
+        return <PlaceholderPage title={navigationItems.find(item => item.id === activePage)?.label} />;
+    }
+  };
 
   return (
     <CssVarsProvider>
@@ -105,7 +129,7 @@ function App() {
             <MenuIcon />
           </IconButton>
 
-          <Typography level="h3">MyRareDx - A rare disease diagnosis dashboard</Typography>
+          <Typography level="h3">RareMind – A smart system that remembers every detail of a patient's story.</Typography>
         </Sheet>
 
         {/* Main Content Area */}
@@ -147,11 +171,7 @@ function App() {
               overflow: 'auto',
             }}
           >
-            {activePage === 'inputs' ? (
-              <InputsPage />
-            ) : (
-              <ResultsPage />
-            )}
+            {renderActivePage()}
           </Box>
         </Box>
       </Box>

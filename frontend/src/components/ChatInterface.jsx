@@ -21,11 +21,21 @@ const ChatInterface = () => {
     const [messageInput, setMessageInput] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [sessionId, setSessionId] = useState(localStorage.getItem('chatSessionId') || null);
+    const [scriptStep, setScriptStep] = useState(0);
+    // API URL that works both locally and in production
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost';
     const messagesEndRef = useRef(null);
 
-    // API URL that works both locally and in production
-    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost';
+    // Scripted responses following the EDS conversation
+    const scriptedResponses = [
+        "Hello! I'm here to help identify potential rare disease phenotypes based on your symptoms. Please describe what symptoms you're experiencing in as much detail as possible.",
+        "I'm sorry to hear that. Do you mean your fingers, elbows, knees, ankles, and/or shoulders?",
+        "I understand. Do these joints hurt during daily activities, during stressful events, or with physical activity?",
+        "Thanks for sharing. Would you say you're flexible?",
+        "That's helpful information. At what age did you notice this flexibility?",
+        "It sounds like you have joint hypermobility (HP:0001382). Can I add this to your list of known symptoms?",
+        "I have a few more questions to determine if you also have joint subluxation/dislocation (HP:0001373). Do you wish to continue?"
+    ];
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,69 +46,21 @@ const ChatInterface = () => {
         scrollToBottom();
     }, [messages]);
 
-    // Load saved messages when component mounts
-    useEffect(() => {
-        const savedMessages = localStorage.getItem('chatMessages');
-        if (savedMessages) {
-            try {
-                setMessages(JSON.parse(savedMessages));
-            } catch (e) {
-                console.error('Error parsing saved messages', e);
-                localStorage.removeItem('chatMessages');
-            }
-        }
-    }, []);
-
-    // Save messages to localStorage when they change
-    useEffect(() => {
-        if (messages.length > 0) {
-            localStorage.setItem('chatMessages', JSON.stringify(messages));
-        }
-    }, [messages]);
-
-    // Save session ID when it changes
-    useEffect(() => {
-        if (sessionId) {
-            localStorage.setItem('chatSessionId', sessionId);
-        }
-    }, [sessionId]);
-
     // Initialize chat when component mounts
     useEffect(() => {
-        if (!sessionId || messages.length === 0) {
-            startChat();
-        } else {
-            setLoading(false);
-        }
+        startChat();
     }, []);
 
     const startChat = async () => {
         setLoading(true);
         setError(null);
+        setScriptStep(0);
 
         try {
-            // Include session ID in request if we have one
-            const url = sessionId
-                ? `${API_URL}/start-chat?session_id=${sessionId}`
-                : `${API_URL}/start-chat`;
-
-            const response = await fetch(url);
-
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            // Save the new session ID
-            setSessionId(data.session_id);
-
-            // Only set welcome message if we don't have messages already
-            if (messages.length === 0) {
-                setMessages([
-                    { sender: 'assistant', text: data.message }
-                ]);
-            }
+            // Initialize with first system message
+            setMessages([
+                { sender: 'assistant', text: scriptedResponses[0] }
+            ]);
         } catch (err) {
             console.error('Error starting chat:', err);
             setError(err.message);
@@ -123,40 +85,68 @@ const ChatInterface = () => {
             { sender: 'assistant', isLoading: true }
         ]);
 
-        try {
-            const response = await fetch(`${API_URL}/send-message`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    text: userMessage.text,
-                    session_id: sessionId
-                })
-            });
+        // Simulate API call delay
+        setTimeout(() => {
+            const nextStep = scriptStep + 1;
 
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
+            if (nextStep < scriptedResponses.length) {
+                // Get next scripted response
+                const responseText = scriptedResponses[nextStep];
+
+                // Special case: After user confirms "sure" to adding the HPO code (after step 5)
+                if (scriptStep === 5) {
+                    // Make API call to add the HPO code
+                    try {
+                        console.log('Attempting to add HPO code HP:0001382');
+                        fetch(`${API_BASE_URL}/hpo-codes`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify([
+                                {
+                                    id: "HP:0001382",
+                                    name: "To be looked up by backend",
+                                    source: "Symptom Assessment"
+                                }
+                            ])
+                        })
+                            .then(response => {
+                                console.log('API response status:', response.status);
+                                if (!response.ok) {
+                                    throw new Error(`API error: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Successfully added HPO code:', data);
+                            })
+                            .catch(error => {
+                                console.error('Error adding HPO code:', error);
+                            });
+                    } catch (error) {
+                        console.error('Error making API call:', error);
+                    }
+                }
+
+                // Replace loading indicator with scripted response
+                setMessages(prevMessages =>
+                    prevMessages
+                        .filter(msg => !msg.isLoading)
+                        .concat([{ sender: 'assistant', text: responseText }])
+                );
+
+                // Update script step for next user message
+                setScriptStep(nextStep);
+            } else {
+                // If we've run out of scripted responses, loop back or provide a default
+                setMessages(prevMessages =>
+                    prevMessages
+                        .filter(msg => !msg.isLoading)
+                        .concat([{ sender: 'assistant', text: "Thank you for providing this information. I've recorded your symptoms. Is there anything else you'd like to share?" }])
+                );
             }
-
-            const data = await response.json();
-
-            // Replace loading indicator with actual response
-            setMessages(prevMessages =>
-                prevMessages
-                    .filter(msg => !msg.isLoading)
-                    .concat([{ sender: 'assistant', text: data.message }])
-            );
-        } catch (err) {
-            console.error('Error sending message:', err);
-
-            // Replace loading indicator with error message
-            setMessages(prevMessages =>
-                prevMessages
-                    .filter(msg => !msg.isLoading)
-                    .concat([{ sender: 'assistant', text: `Sorry, there was an error communicating with the server.` }])
-            );
-        }
+        }, 1000); // 1 second delay to simulate processing
     };
 
     // Handle Enter key press in input
@@ -168,10 +158,8 @@ const ChatInterface = () => {
 
     // Add a reset chat function
     const resetChat = () => {
-        localStorage.removeItem('chatMessages');
-        localStorage.removeItem('chatSessionId');
-        setSessionId(null);
         setMessages([]);
+        setScriptStep(0);
         startChat();
     };
 
