@@ -7,9 +7,7 @@ import os
 import shutil
 from datetime import datetime
 import random
-from app.utils.ontology import load_ontology, precompute_ancestors
-from app.utils.data_processing import read_disease_annotations
-from app.utils.scoring import compute_g_phi, compute_g_pa_phi, phrank_score
+from app.utils.diagnosing import diagnose_helper
 from app.utils.llm_chat import HPODiagnosisChat
 
 # ___________________________ CODE FOR SETTING UP THE API ___________________________
@@ -182,24 +180,13 @@ async def get_diagnoses():
 
     # Convert the stored HPO dictionary into a list of phenotype IDs
     phenotype_list = list(hpo_codes_dict.keys())
+    print(phenotype_list)
 
-    # Ensure we have HPO terms before proceeding
     if not phenotype_list:
-        raise HTTPException(status_code=400, detail="No HPO terms found. Please add HPO codes first.")
+        return {"diagnoses": []}
 
-    # Run Phrank scoring
-    ranked_diseases = phrank_score(phenotype_list, disease_to_hpo, g_phi, g_pa_phi, ancestor_dict, top_n=5)
-
-    # Format response
-    diagnoses = [
-        {
-            "id": index + 1,
-            "name": disease_to_name.get(disease, "Unknown Disease"),
-            "probability": f"{(score / max(ranked_diseases, key=lambda x: x[1])[1]) * 100:.2f}%",
-            "details": f"Ranked {index + 1} in Phrank analysis"
-        }
-        for index, (disease, score) in enumerate(ranked_diseases)
-    ]
+    # diagnose using Phrank scoring
+    diagnoses = diagnose_helper(phenotype_list)
 
     return {"diagnoses": diagnoses}
 

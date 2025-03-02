@@ -71,7 +71,7 @@ const DiagnosisDisplay = ({ sx }) => {
             ) : diagnoses.length === 0 ? (
                 <Box sx={{ p: 2, textAlign: 'center', flexGrow: 1 }}>
                     <Typography level="body-sm" sx={{ fontStyle: 'italic' }}>
-                        No diagnoses available. Upload clinical notes or describe symptoms in the chat.
+                        We need more information to suggest potential diagnoses. Please upload your medical records, describe your symptoms in the chat, or add any known HPO codes.
                     </Typography>
                 </Box>
             ) : (
