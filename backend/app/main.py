@@ -7,7 +7,7 @@ import os
 import shutil
 from datetime import datetime
 import random
-
+from app.utils.diagnosing import diagnose_helper
 from app.utils.llm_chat import HPODiagnosisChat
 
 # ___________________________ CODE FOR SETTING UP THE API ___________________________
@@ -176,9 +176,19 @@ default_diagnoses = [
 
 @app.get("/diagnoses", response_model=DiagnosesResponse)
 async def get_diagnoses():
-    # TODO (Isha)
-    # use hpo_codes_dict
-    return {"diagnoses": default_diagnoses}
+    """Diagnose based on the uploaded HPO terms using the Phrank algorithm."""
+
+    # Convert the stored HPO dictionary into a list of phenotype IDs
+    phenotype_list = list(hpo_codes_dict.keys())
+    print(phenotype_list)
+
+    if not phenotype_list:
+        return {"diagnoses": []}
+
+    # diagnose using Phrank scoring
+    diagnoses = diagnose_helper(phenotype_list)
+
+    return {"diagnoses": diagnoses}
 
 # ___________________________ CODE FOR RECOMMENDATIONS ___________________________
 # Define a model for Recommendation
