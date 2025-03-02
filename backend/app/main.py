@@ -1,3 +1,4 @@
+import uuid
 from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -6,6 +7,9 @@ import os
 import shutil
 from datetime import datetime
 import random
+
+from app.utils.llm_chat import HPODiagnosisChat
+
 # ___________________________ CODE FOR SETTING UP THE API ___________________________
 app = FastAPI()
 
@@ -202,3 +206,34 @@ async def get_recommendations():
     # TODO (aaron)
     # use hpo_codes_dict and diagnosis and 20 unknown phenotypes on what to do next
     return {"recommendations": sample_recommendations}
+
+
+# ___________________________ CODE FOR CHAT FEATURE ___________________________
+class Message(BaseModel):
+    text: str
+
+class ChatResponse(BaseModel):
+    message: str
+
+# Create a single global chat instance
+chat_instance = HPODiagnosisChat()
+
+@app.get("/start-chat", response_model=ChatResponse)
+async def start_chat():
+    """
+    Start or reset the chat with a welcome message
+    """
+    # global chat_instance
+    # chat_instance = HPODiagnosisChat()  # Reset the chat instance
+    # welcome_message = chat_instance.start_conversation()
+    welcome_message = "Hello! I'm here to help identify potential rare disease phenotypes based on your symptoms. Please describe what symptoms you're experiencing in as much detail as possible."
+    
+    return ChatResponse(message=welcome_message)
+
+@app.post("/send-message", response_model=ChatResponse)
+async def send_message(message: Message):
+    """
+    Send a message to the chat
+    """
+    response = chat_instance.process_user_input(message.text)
+    return ChatResponse(message=response)
