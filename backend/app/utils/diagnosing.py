@@ -11,11 +11,9 @@ def diagnose_helper(phenotype_list):
     # setup computational helpers
     disease_to_hpo, disease_to_genes, disease_to_name = read_disease_annotations(hpo_annotations_path)
     ancestor_dict = precompute_ancestors(ontology)
-    g_phi = compute_g_phi(disease_to_hpo)
-    g_pa_phi = compute_g_pa_phi(ancestor_dict, g_phi)
 
     # score using Phrank algorithm
-    ranked_diseases = phrank_score(phenotype_list, disease_to_hpo, g_phi, g_pa_phi, ancestor_dict, top_n=5)
+    ranked_diseases = phrank_score(phenotype_list, disease_to_hpo, ancestor_dict, top_n=3)
 
     # format diseases 
     diagnoses = [
