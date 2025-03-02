@@ -1,0 +1,25 @@
+# Use an official Node runtime as a parent image
+FROM node:14
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the package.json and package-lock.json for dependencies
+COPY package.json package-lock.json /app/
+RUN npm install
+
+# Bundle app source including the public and src directories
+COPY ./public /app/public
+COPY ./src /app/src
+
+# Build the app
+RUN npm run build
+
+# Install serve to serve the static files
+RUN npm install -g serve
+
+# Expose the port that will be used by Render
+EXPOSE 10000
+
+# Serve the built app
+CMD serve -s build -l $PORT
