@@ -15,12 +15,15 @@ def diagnose_helper(phenotype_list):
     # score using Phrank algorithm
     ranked_diseases = phrank_score(phenotype_list, disease_to_hpo, ancestor_dict, top_n=3)
 
-    # format diseases 
+    # Get the maximum score
+    max_score = max(ranked_diseases, key=lambda x: x[1])[1] if ranked_diseases else 0
+
+    # Format diseases with safe division
     diagnoses = [
         {
             "id": index + 1,
             "name": disease_to_name.get(disease, "Unknown Disease"),
-            "probability": f"{(score / max(ranked_diseases, key=lambda x: x[1])[1]) * 100:.2f}%",
+            "probability": f"{(score / max_score) * 100:.2f}%" if max_score > 0 else "0.00%",
             "details": f"Ranked {index + 1} in Phrank analysis"
         }
         for index, (disease, score) in enumerate(ranked_diseases)

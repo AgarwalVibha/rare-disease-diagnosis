@@ -3,15 +3,14 @@ import Typography from '@mui/joy/Typography';
 import Card from '@mui/joy/Card';
 import CardContent from '@mui/joy/CardContent';
 import Divider from '@mui/joy/Divider';
-import List from '@mui/joy/List';
-import ListItem from '@mui/joy/ListItem';
-import ListItemContent from '@mui/joy/ListItemContent';
-import ListItemDecorator from '@mui/joy/ListItemDecorator';
+import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import CircularProgress from '@mui/joy/CircularProgress';
 import Alert from '@mui/joy/Alert';
 import ScienceIcon from '@mui/icons-material/Science';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import BiotechIcon from '@mui/icons-material/Biotech';
+import ImageIcon from '@mui/icons-material/Image';
 import WarningIcon from '@mui/icons-material/Warning';
 
 const Recommendations = ({ initialRecommendations = [] }) => {
@@ -19,8 +18,23 @@ const Recommendations = ({ initialRecommendations = [] }) => {
     const [loading, setLoading] = useState(initialRecommendations.length === 0);
     const [error, setError] = useState(null);
 
-
     const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost') + '/recommendations';
+
+    // Get icon based on recommendation type
+    const getTypeIcon = (type) => {
+        switch (type) {
+            case 'Specialist':
+                return <MedicalServicesIcon sx={{ color: 'text.secondary' }} />;
+            case 'Lab Test':
+                return <BiotechIcon sx={{ color: 'text.secondary' }} />;
+            case 'Genetic':
+                return <BiotechIcon sx={{ color: 'text.secondary' }} />;
+            case 'Imaging':
+                return <ImageIcon sx={{ color: 'text.secondary' }} />;
+            default:
+                return <ScienceIcon sx={{ color: 'text.secondary' }} />;
+        }
+    };
 
     useEffect(() => {
         // Skip API call if we already have recommendations from props
@@ -109,27 +123,61 @@ const Recommendations = ({ initialRecommendations = [] }) => {
     return (
         <Card sx={{ height: '100%' }}>
             <CardContent>
-                <Typography level="title-lg" startDecorator={<ScienceIcon />}>
+                <Typography level="title-md" startDecorator={<ScienceIcon />} sx={{ mb: 2 }}>
                     Recommended Next Steps
                 </Typography>
-                <Divider sx={{ my: 2 }} />
+                <Divider />
+
                 {recommendations.length === 0 ? (
-                    <Typography level="body-md">No recommendations available.</Typography>
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: '120px',
+                        p: 2,
+                        textAlign: 'center'
+                    }}>
+                        <Typography level="body-sm" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                            No recommendations available. We need more information to suggest next steps.
+                        </Typography>
+                    </Box>
                 ) : (
-                    <List>
-                        {recommendations.map((rec) => (
-                            <ListItem key={rec.id || `rec-${rec.title}`}>
-                                <ListItemDecorator>
-                                    {rec.type === 'Specialist' ? <MedicalServicesIcon /> : <ScienceIcon />}
-                                </ListItemDecorator>
-                                <ListItemContent>
-                                    <Typography level="title-sm">{rec.title}</Typography>
-                                    <Typography level="body-sm">Urgency: {rec.urgency}</Typography>
-                                </ListItemContent>
-                                <Button size="sm" variant="soft">Schedule</Button>
-                            </ListItem>
+                    <Box sx={{ mt: 2 }}>
+                        {recommendations.map((rec, index) => (
+                            <Box
+                                key={rec.id}
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    py: 2,
+                                    borderBottom: index < recommendations.length - 1 ? '1px solid' : 'none',
+                                    borderColor: 'divider',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40 }}>
+                                        {getTypeIcon(rec.type)}
+                                    </Box>
+                                    <Box>
+                                        <Typography level="title-sm">
+                                            {rec.title}
+                                        </Typography>
+                                        <Typography level="body-xs" sx={{ color: 'text.tertiary' }}>
+                                            Urgency: {rec.urgency}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                                <Button
+                                    variant="soft"
+                                    size="sm"
+                                    sx={{ minWidth: '90px' }}
+                                >
+                                    Schedule
+                                </Button>
+                            </Box>
                         ))}
-                    </List>
+                    </Box>
                 )}
             </CardContent>
         </Card>

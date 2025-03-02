@@ -153,12 +153,19 @@ async def upload_clinical_notes(
     
 # ___________________________ CODE FOR DIAGNOSING ___________________________
 
-# Define a model for Diagnosis
+# Enhanced diagnoses model with additional useful columns
 class Diagnosis(BaseModel):
     id: int
     name: str
     probability: str
     details: str
+    symptoms: str
+    orpha_code: str
+    inheritance: str
+    prevalence: str
+    specialist: str
+    key_tests: str
+
 
 # Define a response model for list of diagnoses
 class DiagnosesResponse(BaseModel):
@@ -168,10 +175,67 @@ class DiagnosesResponse(BaseModel):
 patient_diagnoses: Dict[str, List[Dict[str, Any]]] = {}
 
 # Mock diagnoses data - would normally be generated from HPO codes and clinical notes
-default_diagnoses = [
-    {"id": 1, "name": "Ehlers-Danlos Syndrome", "probability": "65%", "details": "Connective tissue disorder"},
-    {"id": 2, "name": "Marfan Syndrome", "probability": "48%", "details": "Genetic disorder affecting connective tissue"},
-    {"id": 3, "name": "Pompe Disease", "probability": "32%", "details": "Rare genetic disorder causing muscle weakness"},
+default_diagnoses_demo = [
+    {
+        "id": 1, 
+        "name": "Ehlers-Danlos Syndrome (Hypermobility Type)", 
+        "probability": "87%", 
+        "details": "Connective tissue disorder affecting collagen production",
+        "symptoms": "Joint hypermobility, skin elasticity, easy bruising",
+        "orpha_code": "ORPHA98249",
+        "inheritance": "Autosomal dominant",
+        "prevalence": "1-5/10,000",
+        "specialist": "Geneticist, Rheumatologist",
+        "key_tests": "Genetic panel, Beighton score, skin biopsy"
+    },
+    {
+        "id": 2, 
+        "name": "Gaucher Disease (Type 1)", 
+        "probability": "76%", 
+        "details": "Lysosomal storage disorder with glucocerebroside accumulation",
+        "symptoms": "Hepatosplenomegaly, bone pain, thrombocytopenia",
+        "orpha_code": "ORPHA355",
+        "inheritance": "Autosomal recessive",
+        "prevalence": "1/40,000 - 1/60,000",
+        "specialist": "Hematologist, Geneticist",
+        "key_tests": "Glucocerebrosidase enzyme assay, GBA gene test"
+    },
+    {
+        "id": 3, 
+        "name": "Fabry Disease", 
+        "probability": "65%", 
+        "details": "X-linked lysosomal storage disorder affecting glycosphingolipid metabolism",
+        "symptoms": "Neuropathic pain, angiokeratomas, renal dysfunction",
+        "orpha_code": "ORPHA324",
+        "inheritance": "X-linked",
+        "prevalence": "1/40,000 - 1/117,000",
+        "specialist": "Cardiologist, Nephrologist",
+        "key_tests": "α-galactosidase A activity, GLA gene test"
+    },
+    {
+        "id": 4, 
+        "name": "Marfan Syndrome", 
+        "probability": "58%", 
+        "details": "Genetic disorder affecting the body's connective tissue and fibrillin-1 protein",
+        "symptoms": "Tall stature, aortic dilation, lens dislocation",
+        "orpha_code": "ORPHA558",
+        "inheritance": "Autosomal dominant",
+        "prevalence": "1/5,000",
+        "specialist": "Cardiologist, Ophthalmologist",
+        "key_tests": "Echocardiogram, FBN1 gene test, eye exam"
+    },
+    {
+        "id": 5, 
+        "name": "Stiff Person Syndrome", 
+        "probability": "42%", 
+        "details": "Rare autoimmune neurological disorder affecting GABAergic neurons",
+        "symptoms": "Muscle rigidity, painful spasms, heightened startle",
+        "orpha_code": "ORPHA3198",
+        "inheritance": "Acquired (autoimmune)",
+        "prevalence": "< 1/1,000,000",
+        "specialist": "Neurologist, Immunologist",
+        "key_tests": "Anti-GAD65 antibody test, EMG, lumbar puncture"
+    }
 ]
 
 @app.get("/diagnoses", response_model=DiagnosesResponse)
@@ -180,13 +244,14 @@ async def get_diagnoses():
 
     # Convert the stored HPO dictionary into a list of phenotype IDs
     phenotype_list = list(hpo_codes_dict.keys())
-    print(phenotype_list)
 
     if not phenotype_list:
         return {"diagnoses": []}
 
     # diagnose using Phrank scoring
-    diagnoses = diagnose_helper(phenotype_list)
+    # diagnoses = diagnose_helper(phenotype_list)
+    
+    diagnoses = default_diagnoses_demo # for demo
 
     return {"diagnoses": diagnoses}
 
@@ -194,27 +259,65 @@ async def get_diagnoses():
 # Define a model for Recommendation
 class Recommendation(BaseModel):
     id: int
-    type: str  # 'Specialist' or 'Lab Test'
+    type: str  # 'Specialist', 'Lab Test', 'Imaging', or 'Genetic'
     title: str
     urgency: str  # 'High', 'Medium', 'Low'
+    details: str
+    related_diagnosis: Optional[str] = None
+    estimated_cost: Optional[str] = None
+    insurance_notes: Optional[str] = None
 
 # Define a response model for list of recommendations
 class RecommendationsResponse(BaseModel):
     recommendations: List[Recommendation]
 
 
-# Sample recommendations data
+# Enhanced recommendations data with more details and aligned with our rare disease diagnoses
 sample_recommendations = [
-    {"id": 1, "type": "Specialist", "title": "Geneticist Consultation", "urgency": "High"},
-    {"id": 2, "type": "Lab Test", "title": "Advanced Genetic Panel", "urgency": "Medium"},
-    {"id": 3, "type": "Specialist", "title": "Cardiologist Follow-up", "urgency": "Medium"},
+    {
+        "id": 1, 
+        "type": "Specialist", 
+        "title": "Geneticist Consultation", 
+        "urgency": "High",
+        "details": "Comprehensive evaluation to assess for connective tissue disorders including Ehlers-Danlos and Marfan syndromes",
+        "related_diagnosis": "Ehlers-Danlos Syndrome (Hypermobility Type)",
+        "estimated_cost": "$300-500",
+        "insurance_notes": "Requires referral for most insurance plans"
+    },
+    {
+        "id": 2, 
+        "type": "Genetic", 
+        "title": "Connective Tissue Gene Panel", 
+        "urgency": "Medium",
+        "details": "Comprehensive genetic testing for mutations in COL5A1, COL5A2, FBN1, and other genes related to connective tissue disorders",
+        "related_diagnosis": "Ehlers-Danlos Syndrome (Hypermobility Type), Marfan Syndrome",
+        "estimated_cost": "$1,500-3,000",
+        "insurance_notes": "May require pre-authorization and genetic counseling"
+    },
+    {
+        "id": 3, 
+        "type": "Imaging", 
+        "title": "Echocardiogram", 
+        "urgency": "High",
+        "details": "Evaluate for aortic root dilation, mitral valve prolapse, and other cardiac abnormalities associated with connective tissue disorders",
+        "related_diagnosis": "Marfan Syndrome, Ehlers-Danlos Syndrome (Hypermobility Type)",
+        "estimated_cost": "$1,000-2,500",
+        "insurance_notes": "Generally covered with appropriate diagnosis codes"
+    }
 ]
 
 # GET route to fetch all recommendations
 @app.get("/recommendations", response_model=RecommendationsResponse)
 async def get_recommendations():
-    # TODO (aaron)
-    # use hpo_codes_dict and diagnosis and 20 unknown phenotypes on what to do next
+    """Return recommendations based on the HPO terms in the system.
+    Will only return recommendations if there are HPO terms entered (similar to diagnoses)
+    """
+    # Check if there are any HPO codes in the system
+    if not hpo_codes_dict:
+        # No HPO codes entered yet, return empty list
+        return {"recommendations": []}
+    
+    # Return only the top 3 recommendations
     return {"recommendations": sample_recommendations}
 
 

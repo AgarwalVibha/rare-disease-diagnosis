@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import Typography from '@mui/joy/Typography';
 import Card from '@mui/joy/Card';
-import CardContent from '@mui/joy/CardContent';
 import Divider from '@mui/joy/Divider';
-import Table from '@mui/joy/Table';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import CircularProgress from '@mui/joy/CircularProgress';
 import Alert from '@mui/joy/Alert';
 import Box from '@mui/joy/Box';
 import WarningIcon from '@mui/icons-material/Warning';
+import Accordion from '@mui/joy/Accordion';
+import AccordionDetails from '@mui/joy/AccordionDetails';
+import AccordionSummary from '@mui/joy/AccordionSummary';
+import Chip from '@mui/joy/Chip';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const DiagnosisDisplay = ({ sx }) => {
     const [diagnoses, setDiagnoses] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [expandedDiagnosis, setExpandedDiagnosis] = useState(null);
 
     // API URL that works both locally and in production
     const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost') + '/diagnoses';
@@ -49,6 +53,10 @@ const DiagnosisDisplay = ({ sx }) => {
         return () => clearInterval(intervalId);
     }, []);
 
+    const handleAccordionChange = (diagnosisId) => {
+        setExpandedDiagnosis(expandedDiagnosis === diagnosisId ? null : diagnosisId);
+    };
+
     return (
         <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', ...sx }}>
             <Typography level="title-md" startDecorator={<MedicalServicesIcon />} sx={{ mb: 2 }}>
@@ -76,24 +84,63 @@ const DiagnosisDisplay = ({ sx }) => {
                 </Box>
             ) : (
                 <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-                    <Table aria-label="Potential diagnoses">
-                        <thead>
-                            <tr>
-                                <th>Condition</th>
-                                <th>Probability</th>
-                                <th>Details</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {diagnoses.map((diagnosis) => (
-                                <tr key={diagnosis.id}>
-                                    <td>{diagnosis.name}</td>
-                                    <td>{diagnosis.probability}</td>
-                                    <td>{diagnosis.details}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
+                    {diagnoses.map((diagnosis) => (
+                        <Accordion
+                            key={diagnosis.id}
+                            expanded={expandedDiagnosis === diagnosis.id}
+                            onChange={() => handleAccordionChange(diagnosis.id)}
+                            sx={{ mb: 1 }}
+                        >
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                id={`diagnosis-header-${diagnosis.id}`}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                                    <Typography level="title-sm">{diagnosis.name}</Typography>
+                                    <Chip
+                                        variant="soft"
+                                        color={
+                                            parseInt(diagnosis.probability) > 75 ? "success" :
+                                                parseInt(diagnosis.probability) > 50 ? "warning" :
+                                                    "neutral"
+                                        }
+                                    >
+                                        {diagnosis.probability}
+                                    </Chip>
+                                </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Typography level="body-sm" sx={{ mb: 1 }}>
+                                    <strong>Description:</strong> {diagnosis.details}
+                                </Typography>
+                                <Typography level="body-sm" sx={{ mb: 1 }}>
+                                    <strong>Common Symptoms:</strong> {diagnosis.symptoms}
+                                </Typography>
+                                <Divider sx={{ my: 1 }} />
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                                    <Box sx={{ minWidth: '45%' }}>
+                                        <Typography level="body-xs">
+                                            <strong>Orphanet Code:</strong> {diagnosis.orpha_code}
+                                        </Typography>
+                                        <Typography level="body-xs">
+                                            <strong>Inheritance:</strong> {diagnosis.inheritance}
+                                        </Typography>
+                                        <Typography level="body-xs">
+                                            <strong>Prevalence:</strong> {diagnosis.prevalence}
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ minWidth: '45%' }}>
+                                        <Typography level="body-xs">
+                                            <strong>Specialist Referral:</strong> {diagnosis.specialist}
+                                        </Typography>
+                                        <Typography level="body-xs">
+                                            <strong>Confirmatory Tests:</strong> {diagnosis.key_tests}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </AccordionDetails>
+                        </Accordion>
+                    ))}
                 </Box>
             )}
         </Card>

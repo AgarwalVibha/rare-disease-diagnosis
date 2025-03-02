@@ -1,0 +1,40 @@
+CLINICAL NOTE
+Patient: Alex Johnson
+Date: March 2, 2025
+Physician: Dr. Sarah Chen, Rheumatology
+
+CHIEF COMPLAINT:
+Patient presents with chronic joint pain, recurring joint dislocations, and reports of unusually elastic skin.
+
+HISTORY OF PRESENT ILLNESS:
+30-year-old patient with progressive joint pain since adolescence. Reports "double-jointed" features since childhood. Experiences frequent subluxations of shoulders and fingers. Has had multiple ER visits for joint dislocations. Complains of chronic fatigue and poor wound healing with widened atrophic scars. Patient reports skin that "stretches more than normal."
+
+FAMILY HISTORY:
+Mother has hypermobile joints and chronic pain. Maternal aunt diagnosed with fibromyalgia. Paternal history unknown.
+
+PHYSICAL EXAMINATION:
+- Vital signs stable
+- Beighton score: 7/9 (positive for hypermobility)
+- Skin: Hyperextensible, velvety texture
+- Multiple atrophic scars on knees and elbows
+- Able to place palms flat on floor with knees extended
+- Bilateral thumb to forearm apposition
+- Joint examination reveals hyperextension of elbows >10°
+- Mild pes planus (flat feet) noted
+
+LABORATORY DATA:
+- CBC: Within normal limits
+- CRP: 2.3 mg/L (mildly elevated)
+- ESR: 18 mm/hr (mildly elevated)
+- ANA: Negative
+- Genetic testing pending
+
+ASSESSMENT:
+Patient presents with multiple signs consistent with a connective tissue disorder. Clinical picture suggests possible Ehlers-Danlos Syndrome, hypermobility type. Will also consider Marfan syndrome and other connective tissue disorders in differential diagnosis.
+
+PLAN:
+1. Referral to medical genetics for evaluation
+2. Consider echocardiogram to rule out cardiac involvement
+3. Physical therapy consult for joint protection strategies
+4. Pain management with non-opioid approaches
+5. Genetic testing panel for connective tissue disorders
