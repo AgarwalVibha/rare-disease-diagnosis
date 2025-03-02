@@ -69,7 +69,7 @@ def expand_query_terms(query_terms, ancestor_dict):
         expanded_terms.update(ancestor_dict.get(term, set()))
     return expanded_terms
 
-def phrank_score(query_terms, disease_to_hpo, ancestor_dict, top_n=5):
+def phrank_score(query_terms, disease_to_hpo, ancestor_dict, top_n=3):
     """
     Computes Phrank scores using rank-based disease similarity.
     Instead of using absolute scores, diseases are **ranked** by their similarity to the query.
