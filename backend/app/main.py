@@ -6,6 +6,29 @@ import os
 import shutil
 from datetime import datetime
 import random
+from utils.ontology import load_ontology, precompute_ancestors
+from utils.data_processing import read_disease_annotations
+from utils.scoring import compute_g_phi, compute_g_pa_phi, phrank_score
+
+# ========================== Load Ontology & Data on App Startup ==========================
+
+# ✅ Use a relative path inside the app's `data/` folder
+ontology_path = "data/hp.obo"
+hpo_annotations_path = "data/phenotype.hpoa"
+
+print("📢 Loading Ontology...")
+ontology = load_ontology(ontology_path)
+
+print("📢 Reading Disease Annotations...")
+disease_to_hpo, disease_to_genes, disease_to_name = read_disease_annotations(hpo_annotations_path)
+
+print("📢 Precomputing Ancestors...")
+ancestor_dict = precompute_ancestors(ontology)
+
+print("📢 Precomputing G_phi and G_pa_phi...")
+g_phi = compute_g_phi(disease_to_hpo)
+g_pa_phi = compute_g_pa_phi(ancestor_dict, g_phi)
+
 # ___________________________ CODE FOR SETTING UP THE API ___________________________
 app = FastAPI()
 
@@ -172,9 +195,30 @@ default_diagnoses = [
 
 @app.get("/diagnoses", response_model=DiagnosesResponse)
 async def get_diagnoses():
-    # TODO (Isha)
-    # use hpo_codes_dict
-    return {"diagnoses": default_diagnoses}
+    """Diagnose based on the uploaded HPO terms using the Phrank algorithm."""
+
+    # Convert the stored HPO dictionary into a list of phenotype IDs
+    phenotype_list = list(hpo_codes_dict.keys())
+
+    # Ensure we have HPO terms before proceeding
+    if not phenotype_list:
+        raise HTTPException(status_code=400, detail="No HPO terms found. Please add HPO codes first.")
+
+    # Run Phrank scoring
+    ranked_diseases = phrank_score(phenotype_list, disease_to_hpo, g_phi, g_pa_phi, ancestor_dict, top_n=5)
+
+    # Format response
+    diagnoses = [
+        {
+            "id": index + 1,
+            "name": disease_to_name.get(disease, "Unknown Disease"),
+            "probability": f"{(score / max(ranked_diseases, key=lambda x: x[1])[1]) * 100:.2f}%",
+            "details": f"Ranked {index + 1} in Phrank analysis"
+        }
+        for index, (disease, score) in enumerate(ranked_diseases)
+    ]
+
+    return {"diagnoses": diagnoses}
 
 # ___________________________ CODE FOR RECOMMENDATIONS ___________________________
 # Define a model for Recommendation
