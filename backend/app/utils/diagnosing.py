@@ -13,7 +13,7 @@ def diagnose_helper(phenotype_list):
     ancestor_dict = precompute_ancestors(ontology)
 
     # score using Phrank algorithm
-    ranked_diseases = phrank_score(phenotype_list, disease_to_hpo, ancestor_dict, top_n=3)
+    ranked_diseases = phrank_score(phenotype_list, disease_to_hpo, ancestor_dict, top_n=5)
 
     # Get the maximum score
     max_score = max(ranked_diseases, key=lambda x: x[1])[1] if ranked_diseases else 0
@@ -72,7 +72,7 @@ def expand_query_terms(query_terms, ancestor_dict):
         expanded_terms.update(ancestor_dict.get(term, set()))
     return expanded_terms
 
-def phrank_score(query_terms, disease_to_hpo, ancestor_dict, top_n=3):
+def phrank_score(query_terms, disease_to_hpo, ancestor_dict, top_n=5):
     """
     Computes Phrank scores using rank-based disease similarity.
     Instead of using absolute scores, diseases are **ranked** by their similarity to the query.
