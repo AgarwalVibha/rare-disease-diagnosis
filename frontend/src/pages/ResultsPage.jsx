@@ -13,7 +13,7 @@ import Recommendations from '../components/Recommendations';
 const ResultsPage = ({ diagnoses }) => {
     return (
         <>
-            <Typography level="h2" sx={{ mb: 2 }}>Diagnostic Results</Typography>
+            <Typography level="h2" sx={{ mb: 2 }}>Your personalized assessment</Typography>
 
             <Grid container spacing={2} sx={{ flexGrow: 1 }}>
                 {/* Diagnoses Table Panel */}

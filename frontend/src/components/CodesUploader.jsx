@@ -102,8 +102,8 @@ const CodesUploader = ({ sx }) => {
 
     return (
         <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', ...sx }}>
-            <Typography level="title-md" sx={{ mb: 2 }}>
-                Add HPO Codes
+            <Typography level="title-lg" sx={{ mb: 2 }}>
+                Add Known HPO Codes
             </Typography>
 
             {success ? (
@@ -129,9 +129,8 @@ const CodesUploader = ({ sx }) => {
                         color="primary"
                         onClick={parseHPOCodes}
                         disabled={!codesInput.trim() || isLoading}
-                        startDecorator={isLoading ? <CircularProgress size="sm" /> : <Add />}
                     >
-                        Parse Codes
+                        Validate
                     </Button>
                 </>
             ) : (

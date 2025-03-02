@@ -26,7 +26,10 @@ const InputsPage = () => {
 
     return (
         <>
-            <Typography level="h2" sx={{ mb: 2 }}>Patient Information Input</Typography>
+            <Typography level="h2" sx={{ mb: 1 }}>Your diagnostic journey</Typography>
+            <Typography level="body-md" sx={{ mb: 3, color: 'text.secondary' }}>
+                Every detail of your medical history matters on the path to understanding your rare condition. Share your clinical notes, gene test results, and symptom observations to enhance our diagnostic accuracy.
+            </Typography>
 
             <Grid container spacing={2} sx={{ flexGrow: 1 }}>
                 {/* Left Column - File Upload and HPO Code Upload stacked */}

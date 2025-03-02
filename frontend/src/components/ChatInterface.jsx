@@ -265,7 +265,7 @@ const ChatInterface = () => {
             </CardContent>
             <CardActions sx={{ p: 2, pt: 0 }}>
                 <Input
-                    placeholder="Type your symptoms..."
+                    placeholder="Share your symptoms..."
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyPress={handleKeyPress}

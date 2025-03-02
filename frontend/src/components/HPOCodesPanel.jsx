@@ -8,6 +8,8 @@ import Box from '@mui/joy/Box';
 import Sheet from '@mui/joy/Sheet';
 import CircularProgress from '@mui/joy/CircularProgress';
 import Alert from '@mui/joy/Alert';
+import Divider from '@mui/joy/Divider';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import WarningIcon from '@mui/icons-material/Warning';
 
 const HPOCodesPanel = ({ sx }) => {
@@ -53,7 +55,7 @@ const HPOCodesPanel = ({ sx }) => {
     return (
         <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', ...sx }}>
             <Typography level="title-md" sx={{ mb: 2 }}>
-                Currently Identified HPO Terms
+                Your Medical Profile
             </Typography>
 
             {isLoading && hpoCodes.length === 0 ? (
@@ -67,7 +69,7 @@ const HPOCodesPanel = ({ sx }) => {
                     startDecorator={<WarningIcon />}
                     sx={{ mb: 2 }}
                 >
-                    Error loading HPO terms: {error}
+                    Error loading medical terms: {error}
                 </Alert>
             ) : hpoCodes.length === 0 ? (
                 <Sheet
@@ -83,7 +85,7 @@ const HPOCodesPanel = ({ sx }) => {
                     }}
                 >
                     <Typography level="body-sm" sx={{ fontStyle: 'italic' }}>
-                        No HPO terms have been identified yet. Try uploading clinical notes or describing symptoms in the chat.
+                        No medical terms have been identified yet. Try uploading clinical notes or describing symptoms in the chat.
                     </Typography>
                 </Sheet>
             ) : (
@@ -114,6 +116,18 @@ const HPOCodesPanel = ({ sx }) => {
                     </List>
                 </Box>
             )}
+
+            <Divider sx={{ my: 2 }} />
+
+            <Box sx={{ p: 1, bgcolor: 'background.level1', borderRadius: 'sm' }}>
+                <Typography
+                    level="body-xs"
+                    startDecorator={<InfoOutlinedIcon fontSize="small" />}
+                    sx={{ color: 'text.secondary' }}
+                >
+                    These are Human Phenotype Ontology (HPO) terms - standardized medical descriptions that help us identify potential rare disease diagnoses. The more information you provide, the more accurate our analysis can be.
+                </Typography>
+            </Box>
         </Card>
     );
 };

@@ -41,7 +41,7 @@ function App() {
   const DrawerContent = () => (
     <Box sx={{ width: 240, p: 2 }}>
       <Typography level="h4" sx={{ mb: 2 }}>
-        Rare Disease App
+        Welcome, Alex!
       </Typography>
       <Divider sx={{ my: 2 }} />
       <List size="lg" sx={{ '--ListItem-radius': '8px' }}>
@@ -57,7 +57,7 @@ function App() {
             <ListItemDecorator>
               <InputIcon />
             </ListItemDecorator>
-            <ListItemContent>Inputs</ListItemContent>
+            <ListItemContent>History</ListItemContent>
           </ListItemButton>
         </ListItem>
         <ListItem>
@@ -72,7 +72,7 @@ function App() {
             <ListItemDecorator>
               <AssessmentIcon />
             </ListItemDecorator>
-            <ListItemContent>Results</ListItemContent>
+            <ListItemContent>Guidance</ListItemContent>
           </ListItemButton>
         </ListItem>
       </List>
@@ -105,7 +105,7 @@ function App() {
             <MenuIcon />
           </IconButton>
 
-          <Typography level="h3">Rare Disease Diagnosis Assistant</Typography>
+          <Typography level="h3">MyRareDx - A rare disease diagnosis dashboard</Typography>
         </Sheet>
 
         {/* Main Content Area */}
