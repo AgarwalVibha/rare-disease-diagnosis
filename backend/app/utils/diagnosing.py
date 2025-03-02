@@ -71,46 +71,29 @@ def expand_query_terms(query_terms, ancestor_dict):
         expanded_terms.update(ancestor_dict.get(term, set()))
     return expanded_terms
 
-def compute_g_phi(disease_to_hpo):
-    """Compute G_phi (number of diseases annotated with each phenotype)."""
-    g_phi = defaultdict(int)
-    for hpo_terms in disease_to_hpo.values():
-        for term in hpo_terms:
-            g_phi[term] += 1
-    return g_phi
+def phrank_score(query_terms, disease_to_hpo, ancestor_dict, top_n=5):
+    """
+    Computes Phrank scores using rank-based disease similarity.
+    Instead of using absolute scores, diseases are **ranked** by their similarity to the query.
 
-def compute_g_pa_phi(ancestor_dict, g_phi):
-    """Compute G_pa_phi (number of diseases annotated with the parent term of each phenotype)."""
-    g_pa_phi = defaultdict(int)
-    for term, count in g_phi.items():
-        parent_terms = ancestor_dict.get(term, set())
-        for parent in parent_terms:
-            g_pa_phi[parent] += count  # Sum counts from child terms
-    return g_pa_phi
+    - Diseases with **more overlapping phenotypes** rank **higher**.
+    """
+    disease_ranks = {}
 
-def phrank_score(query_terms, disease_to_hpo, g_phi, g_pa_phi, ancestor_dict, top_n=5):
-    """Compute Phrank scores using precomputed ancestors."""
-    scores = {}
-
-    # Compute expanded query terms once
+    # Expand query terms
     expanded_query = expand_query_terms(query_terms, ancestor_dict)
 
-    # Precompute expanded terms for diseases
-    disease_expansions = {disease: expand_query_terms(hpo_terms, ancestor_dict)
-                          for disease, hpo_terms in disease_to_hpo.items()}
+    # Compute disease rankings based on phenotype overlap
+    for disease, hpo_terms in disease_to_hpo.items():
+        expanded_disease_terms = expand_query_terms(hpo_terms, ancestor_dict)
 
-    for disease, expanded_disease in disease_expansions.items():
-        common_ancestors = expanded_query.intersection(expanded_disease)
+        # Count shared terms
+        shared_terms = expanded_query.intersection(expanded_disease_terms)
 
-        score = 0
-        for term in common_ancestors:
-            g_term = g_phi.get(term, 1)
-            g_parent = g_pa_phi.get(term, 1)
+        # Score is the count of shared terms
+        disease_ranks[disease] = len(shared_terms)
 
-            if g_term > 0 and g_parent > 0:
-                score += -math.log2(g_term / g_parent)
+    # Sort diseases by rank score (higher is better)
+    ranked_diseases = sorted(disease_ranks.items(), key=lambda x: x[1], reverse=True)
 
-        scores[disease] = score
-
-    # Sort and return only the top N diseases
-    return sorted(scores.items(), key=lambda x: x[1], reverse=True)[:top_n]
+    return ranked_diseases[:top_n]
