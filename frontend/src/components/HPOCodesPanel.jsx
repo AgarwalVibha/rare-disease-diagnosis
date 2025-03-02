@@ -18,7 +18,7 @@ const HPOCodesPanel = ({ sx }) => {
     const [error, setError] = useState(null);
 
     // API URL based on Docker setup
-    const API_URL = 'http://localhost/hpo-codes';
+    const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost') + '/hpo-codes';
 
     // Fetch HPO codes on component mount
     useEffect(() => {

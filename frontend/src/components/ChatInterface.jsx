@@ -24,8 +24,8 @@ const ChatInterface = () => {
     const [sessionId, setSessionId] = useState(localStorage.getItem('chatSessionId') || null);
     const messagesEndRef = useRef(null);
 
-    // API URL based on your setup
-    const API_URL = 'http://localhost';
+    // API URL that works both locally and in production
+    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost';
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

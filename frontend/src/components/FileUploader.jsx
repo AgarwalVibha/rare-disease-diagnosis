@@ -13,7 +13,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 
 const FileUploader = ({ onAnalysisComplete = () => { } }) => {
 
-    const API_URL = 'http://localhost/clinical-notes';
+    const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost') + '/clinical-notes';
 
     const [file, setFile] = useState(null);
     const [uploading, setUploading] = useState(false);

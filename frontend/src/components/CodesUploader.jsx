@@ -12,8 +12,8 @@ import CircularProgress from '@mui/joy/CircularProgress';
 import Add from '@mui/icons-material/Add';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 
-// API URL based on Docker setup
-const API_URL = 'http://localhost/hpo-codes';
+// API URL that works both locally and in production
+const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost') + '/hpo-codes';
 
 const CodesUploader = ({ sx }) => {
     const [codesInput, setCodesInput] = useState('');
