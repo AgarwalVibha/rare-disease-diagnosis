@@ -19,8 +19,8 @@ const Recommendations = ({ initialRecommendations = [] }) => {
     const [loading, setLoading] = useState(initialRecommendations.length === 0);
     const [error, setError] = useState(null);
 
-    // API URL based on Docker setup (backend on port 80)
-    const API_URL = 'http://localhost/recommendations';
+
+    const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost') + '/recommendations';
 
     useEffect(() => {
         // Skip API call if we already have recommendations from props

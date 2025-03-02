@@ -15,8 +15,8 @@ const DiagnosisDisplay = ({ sx }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // API URL based on Docker setup
-    const API_URL = 'http://localhost/diagnoses';
+    // API URL that works both locally and in production
+    const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost') + '/diagnoses';
 
     useEffect(() => {
         const fetchDiagnoses = async () => {

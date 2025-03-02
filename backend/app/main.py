@@ -219,31 +219,53 @@ async def get_recommendations():
 
 
 # ___________________________ CODE FOR CHAT FEATURE ___________________________
+# Define chat_sessions at the module level before using it
+chat_sessions: Dict[str, HPODiagnosisChat] = {}
+
 class Message(BaseModel):
     text: str
 
+
 class ChatResponse(BaseModel):
     message: str
+    session_id: str
 
-# Create a single global chat instance
-chat_instance = HPODiagnosisChat()
-
+# Update the start-chat endpoint
 @app.get("/start-chat", response_model=ChatResponse)
-async def start_chat():
+async def start_chat(session_id: Optional[str] = None):
     """
-    Start or reset the chat with a welcome message
+    Start or reset a chat with a welcome message.
+    If session_id is provided and exists, return that session.
+    If not, create a new session.
     """
-    # global chat_instance
-    # chat_instance = HPODiagnosisChat()  # Reset the chat instance
-    # welcome_message = chat_instance.start_conversation()
-    welcome_message = "Hello! I'm here to help identify potential rare disease phenotypes based on your symptoms. Please describe what symptoms you're experiencing in as much detail as possible."
+    global chat_sessions
     
-    return ChatResponse(message=welcome_message)
+    # If no session_id or session doesn't exist, create a new one
+    if not session_id or session_id not in chat_sessions:
+        session_id = str(uuid.uuid4())
+        chat_sessions[session_id] = HPODiagnosisChat()
+    
+    # Get the chat instance for this session
+    chat_instance = chat_sessions[session_id]
+    welcome_message = chat_instance.start_conversation()
+    
+    return ChatResponse(message=welcome_message, session_id=session_id)
 
+# Update the send-message endpoint
 @app.post("/send-message", response_model=ChatResponse)
-async def send_message(message: Message):
+async def send_message(request_data: dict):
     """
-    Send a message to the chat
+    Send a message to a specific chat session
     """
-    response = chat_instance.process_user_input(message.text)
-    return ChatResponse(message=response)
+    message_text = request_data.get("text")
+    session_id = request_data.get("session_id")
+    
+    if not message_text or not session_id:
+        raise HTTPException(status_code=400, detail="Missing message text or session ID")
+    
+    if session_id not in chat_sessions:
+        # Create a new session if it doesn't exist
+        chat_sessions[session_id] = HPODiagnosisChat()
+    
+    response = chat_sessions[session_id].process_user_input(message_text)
+    return ChatResponse(message=response, session_id=session_id)

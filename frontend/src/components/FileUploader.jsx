@@ -13,7 +13,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 
 const FileUploader = ({ onAnalysisComplete = () => { } }) => {
 
-    const API_URL = 'http://localhost/recommendations';
+    const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost') + '/clinical-notes';
 
     const [file, setFile] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -106,7 +106,7 @@ const FileUploader = ({ onAnalysisComplete = () => { } }) => {
                         <>
                             <UploadIcon sx={{ fontSize: 40, mb: 2, color: 'primary.500' }} />
                             <Typography level="body-sm" sx={{ mb: 1 }}>
-                                Drag and drop your .txt file here or
+                                Drag and drop your file here or
                             </Typography>
                             <Button
                                 component="label"
