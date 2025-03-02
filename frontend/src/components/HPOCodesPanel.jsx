@@ -46,7 +46,7 @@ const HPOCodesPanel = ({ sx }) => {
         fetchHPOCodes();
 
         // Set up polling to periodically check for updates
-        const intervalId = setInterval(fetchHPOCodes, 30000); // Check every 30 seconds
+        const intervalId = setInterval(fetchHPOCodes, 2000); // Check every 30 seconds
 
         // Clean up interval on component unmount
         return () => clearInterval(intervalId);

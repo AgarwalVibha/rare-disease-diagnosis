@@ -5,8 +5,10 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import os
 import shutil
+import logging
 from datetime import datetime
 import random
+from app.utils.extraction import parse_note_to_hpo
 from app.utils.diagnosing import diagnose_helper
 from app.utils.llm_chat import HPODiagnosisChat
 
@@ -88,6 +90,8 @@ async def add_hpo_codes(codes: List[HPOCode]):
     # Return all codes
     return {"codes": list(hpo_codes_dict.values())}
 
+logger = logging.getLogger(__name__)
+
 @app.get("/hpo-codes", response_model=HPOCodesResponse)
 async def get_hpo_codes():
     """
@@ -114,41 +118,41 @@ async def upload_clinical_notes(
     patient_id: Optional[str] = Form(None),
     notes: Optional[str] = Form(None)
 ):
+    # update hpo_codes_dict 
     try:
-        # Generate a unique filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_extension = os.path.splitext(file.filename)[1]
-        unique_filename = f"{timestamp}{file_extension}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-        
-        # Save the uploaded file
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        
-        # Get file info
-        file_info = {
-            "original_filename": file.filename,
-            "saved_as": unique_filename,
-            "content_type": file.content_type,
-            "size_in_bytes": os.path.getsize(file_path),
-            "patient_id": patient_id,
-            "additional_notes": notes
-        }
+        # Reset the global dictionary for each new upload
+        hpo_codes_dict.clear()
 
-        # TODO update hpo_codes_dict (see get hpo-codes for format)
+        # Read and decode the uploaded file
+        contents = await file.read()
+        text = contents.decode("utf-8")
+
         
-        # Return success response with mock data
+        # Extract HPO terms using the parse_note_to_hpo function which returns a dict
+        extracted_hpo = parse_note_to_hpo(user_input_text=text)
+
+        # # Debugging: Print extracted HPO terms
+        # print("Extracted HPO terms:", extracted_hpo)
+        
+        # Update the global hpo_codes_dict with the extracted HPO terms
+        for hpo_id, hpo_data in extracted_hpo.items():
+            hpo_codes_dict[hpo_id] = hpo_data
+        
+        # # Debugging: Print updated hpo_codes_dict
+        # print("Updated hpo_codes_dict:", hpo_codes_dict)
+        
         return {
             "success": True,
-            "message": f"Successfully processed clinical notes from file: {file.filename}",
-            "file_info": file_info,
+            "message": "Clinical notes processed successfully.",
+            "file_info": {"filename": file.filename, "size": len(contents)},
+            "extracted_hpo": [{"id": hpo_id, "name": hpo_data["name"]} for hpo_id, hpo_data in extracted_hpo.items()]
         }
     
     except Exception as e:
-        # If anything goes wrong during upload/processing
         return {
             "success": False,
-            "message": f"Error processing file: {str(e)}"
+            "message": f"Error processing file: {str(e)}",
+            "file_info": None
         }
     
 # ___________________________ CODE FOR DIAGNOSING ___________________________
