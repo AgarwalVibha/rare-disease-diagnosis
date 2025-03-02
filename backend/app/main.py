@@ -7,29 +7,9 @@ import os
 import shutil
 from datetime import datetime
 import random
-from utils.ontology import load_ontology, precompute_ancestors
-from utils.data_processing import read_disease_annotations
-from utils.scoring import compute_g_phi, compute_g_pa_phi, phrank_score
-
-# ========================== Load Ontology & Data on App Startup ==========================
-
-# ✅ Use a relative path inside the app's `data/` folder
-ontology_path = "data/hp.obo"
-hpo_annotations_path = "data/phenotype.hpoa"
-
-print("📢 Loading Ontology...")
-ontology = load_ontology(ontology_path)
-
-print("📢 Reading Disease Annotations...")
-disease_to_hpo, disease_to_genes, disease_to_name = read_disease_annotations(hpo_annotations_path)
-
-print("📢 Precomputing Ancestors...")
-ancestor_dict = precompute_ancestors(ontology)
-
-print("📢 Precomputing G_phi and G_pa_phi...")
-g_phi = compute_g_phi(disease_to_hpo)
-g_pa_phi = compute_g_pa_phi(ancestor_dict, g_phi)
-
+from app.utils.ontology import load_ontology, precompute_ancestors
+from app.utils.data_processing import read_disease_annotations
+from app.utils.scoring import compute_g_phi, compute_g_pa_phi, phrank_score
 from app.utils.llm_chat import HPODiagnosisChat
 
 # ___________________________ CODE FOR SETTING UP THE API ___________________________
