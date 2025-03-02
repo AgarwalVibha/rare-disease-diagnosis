@@ -1,3 +1,12 @@
+# RareMind
+RareMind is a web portal that helps patients keep track of all their medical data, refine and track symptoms, get a differential diagnosis, and recommendations for next steps. We also help them refine their symptoms, and provide a sharable portfolio they can take to their doctor appointments.
+
+## Features
+### We help patients identify Human Phenotype Ontology (HPO) terms in 3 ways:
+- directly entering known HPO codes
+- uploading clinical notes from appointments and extracting HPOs using ClinPhen
+- using an interactive LLM-based chatbot to identify HPOs from a conversation about symptoms, useful for patients unfamilar with heavy medical jargon 
+
 This project is a basic setup adapted from the repo plain-fastapi-react-docker for a web application using FastAPI and React, containerized with Docker. The backend serves a simple API that communicates with the frontend, which displays data retrieved from the API.
 
 ## Project Structure
@@ -26,7 +35,7 @@ To run this project, you will need Docker and Docker Compose installed on your m
 
 1. **Clone the Repository**
    ```bash
-   git clone https://yourrepositoryurl/plain-fastapi-react-docker.git
+   git clone git@github.com:AgarwalVibha/rare-disease-diagnosis.git
    cd rare-disease-diagnosis
    ```
 
@@ -53,10 +62,6 @@ To stop the application and remove containers, networks, and volumes created by 
 ```bash
 docker-compose down -v
 ```
-
-## Contributing
-
-Contributions to this project are welcome. Please fork the repository and submit a pull request.
 
 ## License
 
